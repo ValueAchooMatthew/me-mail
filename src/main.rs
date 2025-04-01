@@ -14,8 +14,9 @@ async fn main() -> Result<(), tokio::io::Error> {
     .after_help(
       "lmaoing at you so hard rn"
     ).get_matches();
-  
-  println!("{}", email_to_authenticate.get_one::<String>("email").unwrap_or(&"No email provided".to_owned()));
+    
+  let blank_email_message = String::from("No email provided");
+  println!("{}", email_to_authenticate.get_one::<String>("email").unwrap_or(&blank_email_message));
 
   Ok(())
 }
