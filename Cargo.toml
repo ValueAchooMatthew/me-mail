@@ -2,7 +2,7 @@
 name = "me-mail"
 version = "0.1.0"
 edition = "2021"
-authors = ["Matthew Farah <matthewtamerfarah@gmail.com>", "Nabil Aldhini <epicswagman@based.com>"]
+authors = ["Matthew Farah <matthewtamerfarah@gmail.com>", "Nabil Aldihni <epicswagman@based.com>"]
 description = "A CLI tool to perform automated tasks on authenticated email inboxes"
 
 [dependencies]
