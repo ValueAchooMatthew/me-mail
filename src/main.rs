@@ -4,7 +4,7 @@ mod endpoints;
 mod types;
 
 use actix_web::{App, HttpServer};
-use anyhow::Error;
+use types::Result;
 use utils::get_client_id;
 use endpoints::auth_flow_endpoint::handle_redirect;
 
@@ -22,7 +22,7 @@ use endpoints::auth_flow_endpoint::handle_redirect;
 const REDIRECT_URI: &str = "http://localhost:8080/signin-google";
 
 #[actix_web::main]
-async fn main() -> Result<(), Error> {
+async fn main() -> Result<()> {
 
   let client_id = get_client_id();
 
@@ -48,3 +48,4 @@ async fn main() -> Result<(), Error> {
 
   Ok(())
 }
+

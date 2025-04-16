@@ -1,6 +1,6 @@
 use actix_web::{get, HttpRequest, HttpResponse, Responder};
 use reqwest::Client;
-use super::super::types::Result;
+use crate::types::Result;
 
 use crate::{structs::TokenResponse, utils::{get_client_id, get_client_secret, retrieve_value_from_query_key}, REDIRECT_URI};
 

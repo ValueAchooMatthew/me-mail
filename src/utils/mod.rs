@@ -37,7 +37,6 @@ pub fn get_email_to_authenticate() -> Option<String> {
 }
 
 pub fn get_client_id() -> String {
-
   dotenv::dotenv().ok().unwrap();
   env::var("CLIENT_ID").unwrap()
 }

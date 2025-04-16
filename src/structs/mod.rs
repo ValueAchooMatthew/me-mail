@@ -20,6 +20,10 @@ pub enum Error {
   ReqwestError(#[from] reqwest::Error),
   #[error("JSON parse error: {0}")]
   JsonError(#[from] serde_json::Error),
+  #[error("Actix error: {0}")]
+  ActixError(#[from] actix_web::Error),
+  #[error("Stdio error: {0}")]
+  StdioError(#[from] std::io::Error),
 }
 
 impl ResponseError for Error {
@@ -28,6 +32,8 @@ impl ResponseError for Error {
       Self::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR,
       Self::ReqwestError(_) => StatusCode::BAD_GATEWAY,
       Self::JsonError(_) => StatusCode::BAD_REQUEST,
+      Self::ActixError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+      Self::StdioError(_) => StatusCode::INTERNAL_SERVER_ERROR,
     }
   }
   fn error_response(&self) -> HttpResponse {
