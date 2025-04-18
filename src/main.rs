@@ -2,11 +2,14 @@ mod utils;
 mod structs;
 mod endpoints;
 mod types;
+mod user_functions;
 
 use actix_web::{App, HttpServer};
 use types::Result;
 use utils::get_client_id;
 use endpoints::auth_flow_endpoint::handle_redirect;
+
+use utils::open_url_on_user_brower;
 
 // For hot reload:
 // watchexec -e rs -r cargo run
@@ -27,7 +30,7 @@ async fn main() -> Result<()> {
   let client_id = get_client_id();
 
   // Scopes must be space delimited
-  let scopes = "email";
+  let scopes = "email https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose https://www.googleapis.com/auth/gmail.insert";
 
   let auth_url = format!(
     "https://accounts.google.com/o/oauth2/v2/auth?client_id={}&redirect_uri={}&response_type=code&scope={}&access_type=offline&prompt=consent",
@@ -36,7 +39,7 @@ async fn main() -> Result<()> {
     urlencoding::encode(scopes),
   );
 
-  println!("{}", auth_url);
+  open_url_on_user_brower(&auth_url)?;
 
   HttpServer::new(|| {
     App::new()

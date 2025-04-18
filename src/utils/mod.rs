@@ -1,6 +1,6 @@
 use std::env;
-
 use clap::{arg, crate_authors, crate_description, crate_version, Command};
+use crate::types::Result;
 
 pub fn retrieve_value_from_query_key<'a>(query_string: &'a str, key: &'a str) -> &'a str {
 
@@ -44,4 +44,13 @@ pub fn get_client_id() -> String {
 pub fn get_client_secret() -> String {
   dotenv::dotenv().ok().unwrap();
   env::var("CLIENT_SECRET").unwrap()
+}
+
+pub fn open_url_on_user_brower(url: &str) -> Result<()> {
+  open::that(url)?;
+  Ok(())
+}
+
+pub fn request_access_token_from_refresh() {
+  
 }

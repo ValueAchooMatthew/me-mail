@@ -11,6 +11,12 @@ pub struct TokenResponse {
   id_token: String
 }
 
+impl TokenResponse {
+  pub fn get_access_token(&self) -> &str {
+    &self.access_token
+  }
+}
+
 // Taken from https://stackoverflow.com/a/76889764/14185351, just useful boilerplate for working with anyhow and actix
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
