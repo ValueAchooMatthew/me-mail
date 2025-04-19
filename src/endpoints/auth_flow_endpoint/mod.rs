@@ -1,8 +1,16 @@
 use actix_web::{get, HttpRequest, HttpResponse, Responder};
 use reqwest::Client;
-use crate::types::Result;
-use crate::user_functions::get_user_emails;
-use crate::{structs::TokenResponse, utils::{get_client_id, get_client_secret, retrieve_value_from_query_key}, REDIRECT_URI};
+use crate::{
+    structs::TokenResponse, 
+    utils::{
+        get_client_id, 
+        get_client_secret, 
+        retrieve_value_from_query_key
+    },
+    types::Result,
+    user_functions::get_user_emails,
+    REDIRECT_URI
+};
 
 #[get("/signin-google")]
 pub async fn handle_redirect(req: HttpRequest) -> Result<impl Responder> {
@@ -21,7 +29,7 @@ pub async fn handle_redirect(req: HttpRequest) -> Result<impl Responder> {
       ("code", code.as_str()),
       ("client_id", &client_id),
       ("client_secret", &client_secret),
-      ("redirect_uri", REDIRECT_URI),
+      ("redirect_uri" REDIRECT_URI),
       ("grant_type", "authorization_code")
     ])
     .send()
