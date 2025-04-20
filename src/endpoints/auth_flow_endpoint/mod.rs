@@ -29,7 +29,7 @@ pub async fn handle_redirect(req: HttpRequest) -> Result<impl Responder> {
       ("code", code.as_str()),
       ("client_id", &client_id),
       ("client_secret", &client_secret),
-      ("redirect_uri" REDIRECT_URI),
+      ("redirect_uri", REDIRECT_URI),
       ("grant_type", "authorization_code")
     ])
     .send()
