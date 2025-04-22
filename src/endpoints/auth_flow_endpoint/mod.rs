@@ -3,9 +3,9 @@ use reqwest::Client;
 use crate::{
     structs::TokenResponse, 
     utils::{
-        get_client_id, 
-        get_client_secret, 
-        retrieve_value_from_query_key
+      get_client_id, 
+      get_client_secret, 
+      retrieve_value_from_query_key
     },
     types::Result,
     user_functions::get_user_emails,
