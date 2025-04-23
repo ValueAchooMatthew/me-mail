@@ -33,8 +33,7 @@ pub async fn get_user_emails(token_response: TokenResponse) -> Result<()> {
       .await?
     )?;
 
-    println!("{:?}", email.get_contents());
-    break;
+    email.get_contents()?;
   }
 
   Ok(())

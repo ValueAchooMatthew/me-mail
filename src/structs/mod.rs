@@ -1,4 +1,5 @@
 use actix_web::{http::StatusCode, HttpResponse, ResponseError};
+use scraper::{node, Html};
 use serde::{Deserialize, Serialize};
 use std::str;
 use crate::types::Result;
@@ -91,25 +92,25 @@ pub struct Email {
   // pub raw: String
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct MessagePart {
   partId: String,
   mimeType: String,
   filename: String,
-  headers: Vec<Header>,
+  headers: Headers,
   body: MessagePartBody,
   parts: Option<Vec<MessagePart>>
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct MessagePartBody {
   attachmentId: Option<String>,
   size: u32,
   data: Option<String>
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct Header {
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Header {
   name: String,
   value: String
 }
@@ -117,14 +118,39 @@ struct Header {
 impl Email {
   pub fn get_contents(self) -> Result<()> {
 
-    if let Some(data) = &self.payload.body.data {
-      let html = str::from_utf8(&base64_url::decode(&self.remove_padding(&data))?)?.to_owned();
-      println!("{html:?}")
+    // Forwarded emails have no body. 
+    if let Some(data) = &self.get_payload().get_desired_email(
+      "Nabil Aldihni <aldihninabil@gmail.com>", 
+      "Fwd: Your Enbridge Gas ebill is ready for viewing"
+    ) {
+
+      let data = &data.body.data.clone().unwrap();
+
+      let html = Html::parse_fragment(
+        str::from_utf8(&base64_url::decode(&self.remove_padding(&data))?)?
+      );
+      for node in html.tree {
+        match node {
+          node::Node::Text(text) => {
+            if text.contains("Account Balance") {
+
+              for fragment in text.split("\n").into_iter() {
+                if fragment.contains("$") {
+                  let amount_owed = &fragment[1..];
+                  println!("Amount owed: {amount_owed}")
+                }
+              }
+            }
+          },
+          _ => ()
+
+        }
+      }
     }
 
-    if let Some(parts) = self.payload.parts {
-      println!("{:?}", parts);
-    }
+    // if let Some(parts) = self.payload.parts {
+      // println!("{:?}", parts);
+    // }
 
     Ok(())
   }
@@ -135,4 +161,58 @@ impl Email {
     encoded_string.chars().filter(|c| c != &'=').collect()
   }
 
+  fn get_payload(&self) -> MessagePart {
+    self.payload.to_owned()
+  }
+
+  // Emails are forwarded by including the original email to be forwarded as a MessagePart in the parts vec
+  // Of a new email sent to the recipient. Thus, to check a user's inbox for a desired email, we must check
+  // All emails as well as their parts to see if it matches the criteria.
+}
+
+
+// Flawed aproach since if forwarded message has the same subject line as the original message,
+// Will fire anwyays. But whatever
+impl MessagePart {
+  fn get_desired_email(&self, sender_email: &str, subject_line: &str) -> Option<Self> {
+    if self.headers.is_message_sent_from_sender(sender_email, subject_line) {
+      // Shittiest code ever written but working with emails sucks
+      if self.headers.does_message_have_attachments() {
+        return Some(self.parts.clone().unwrap().get(0).unwrap().clone())
+      } else {
+        return Some(self.clone());
+      }
+    }
+    None
+  }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct Headers(Vec<Header>);
+
+impl Headers {
+  pub fn is_message_sent_from_sender(&self, sender_email: &str, subject_line: &str) -> bool {
+
+    let mut sender_match = false;
+    let mut subject_match = false;
+    
+    for header in self.0.iter() {
+      if header.name == "From" && header.value == sender_email {
+        sender_match = true;
+      } else if header.name == "Subject" && header.value == subject_line {
+        subject_match = true
+      }
+    };
+    subject_match && sender_match
+  }
+
+  pub fn does_message_have_attachments(&self) -> bool {
+
+    for header in self.0.iter() {
+      if header.name == "Content-Type" && header.value.contains("multipart/alternative"){
+        return true;
+      }
+    }
+    false
+  }
 }
